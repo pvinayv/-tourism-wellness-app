@@ -31,10 +31,9 @@ jobs:
           # Ensures no syntax errors before the heavy lift of deployment
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
-      - name: Install and Configure Git LFS
+     - name: Install and Configure Git LFS
         run: |
           git lfs install
-          # Explicitly track the model file as a binary large object
           git lfs track "*.joblib"
           git config --global user.email "git-actions@github.com"
           git config --global user.name "GitHub Actions"
@@ -43,7 +42,11 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # Authenticate and push using the Write Token
+          # Adding the remote using the token for authentication
           git remote add hf https://pvinayv:$HF_TOKEN@huggingface.co/spaces/pvinayv/tourism-wellness-app
-          # Force push ensures GitHub's version overrides the Space exactly
+          
+          # We need to make sure the .gitattributes file (which tracks LFS) is included
+          git add .gitattributes
+          
+          # Force push to ensure the Space matches your GitHub exactly
           git push --force hf main
