@@ -1,0 +1,8 @@
+pandas==2.2.2
+xgboost==2.0.3
+scikit-learn==1.4.2
+joblib==1.4.2
+huggingface_hub==0.23.0
+streamlit==1.33.0
+# Removed explicit numpy pinning to allow system to choose compatible version
+# Forced update marker: 2026-03-29 11:25:14

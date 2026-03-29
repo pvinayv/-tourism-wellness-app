@@ -5,7 +5,7 @@ from huggingface_hub import hf_hub_download
 
 st.set_page_config(page_title="Visit with Us - Wellness Predictor", layout="centered")
 
-st.title("Tourism Package Purchase Predictor.")
+st.title("Tourism Package Purchase Predictor")
 st.markdown("Enter customer details below to predict the likelihood of a Wellness Package purchase.")
 
 # Dummy version string to force content change
