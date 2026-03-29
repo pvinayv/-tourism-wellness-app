@@ -23,31 +23,35 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install flake8
+          pip install flake8 huggingface_hub
 
       - name: Code Quality Check (Linting)
         run: |
-          # Ensures code is clean before deployment
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
-      - name: Configure Git LFS and Identity
-        run: |
-          git config --global user.email "pvinayv@example.com"
-          git config --global user.name "pvinayv"
-          git lfs install
-          # Force track and migrate the file into LFS format
-          git lfs track "*.joblib"
-          git add .gitattributes
-          # We must ensure the runner 'sees' the joblib as an LFS object
-          git add model.joblib
-          git commit -m "chore: ensure model.joblib is tracked via LFS" || echo "No changes"
-
-      - name: Deploy to Hugging Face Spaces
+      - name: Clean Deploy to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # Adding the remote using the secret token
-          git remote add hf https://pvinayv:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/pvinayv/tourism-wellness-app
+          # 1. Setup Identity
+          git config --global user.email "pvinayv@example.com"
+          git config --global user.name "pvinayv"
           
-          # Force push is mandatory here to overwrite the previous 'non-LFS' attempts
-          git push --force hf main
+          # 2. Initialize Git LFS correctly
+          git lfs install
+          
+          # 3. Create a temporary deployment directory to avoid history conflicts
+          mkdir deploy_dir
+          cp app.py requirements.txt Dockerfile model.joblib deploy_dir/
+          cd deploy_dir
+          
+          # 4. Initialize a fresh git repo for the push
+          git init
+          git lfs track "*.joblib"
+          git add .gitattributes
+          git add .
+          git commit -m "MLOps: Automated deployment via GitHub Actions"
+          
+          # 5. Push to Hugging Face (Force override to fix the binary error)
+          git remote add hf https://pvinayv:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/pvinayv/tourism-wellness-app
+          git push --force hf master:main
