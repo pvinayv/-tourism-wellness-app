@@ -29,30 +29,36 @@ jobs:
         run: |
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
-      - name: Clean Deploy to Hugging Face
+      - name: Deploy to Hugging Face Spaces
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # 1. Setup Identity
+          # 1. Install and initialize LFS
+          git lfs install
+          
+          # 2. Configure identity
           git config --global user.email "pvinayv@example.com"
           git config --global user.name "pvinayv"
           
-          # 2. Initialize Git LFS
-          git lfs install
-          
-          # 3. Create a sibling directory to avoid circular copy errors
+          # 3. Create a totally clean sandbox outside the current directory
           mkdir ../deploy_dir
           cp -r . ../deploy_dir/
           cd ../deploy_dir
           
-          # 4. Initialize and force the branch name to 'main'
+          # 4. Remove the old .git folder to destroy the "bad" binary history
+          rm -rf .git
+          
+          # 5. Initialize fresh and explicitly track LFS before adding files
           git init -b main
           git lfs track "*.joblib"
           git add .gitattributes
-          git add .
-          git commit -m "MLOps: Automated deployment sync"
           
-          # 5. Push to Hugging Face
-          # We push the local 'main' branch to the remote 'main' branch
+          # 6. Add all files - the joblib will now only be seen as an LFS pointer
+          git add .
+          git commit -m "MLOps: Clean deployment bypass for binary restrictions"
+          
+          # 7. Push using the authenticated remote
           git remote add hf https://pvinayv:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/pvinayv/tourism-wellness-app
-          git push --force hf main:main
+          
+          # 8. Force push to overwrite the problematic history on the server
+          git push --force hf main
