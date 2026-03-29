@@ -37,21 +37,26 @@ jobs:
           git config --global user.email "pvinayv@example.com"
           git config --global user.name "pvinayv"
           
-          # 2. Initialize Git LFS correctly
+          # 2. Initialize Git LFS
           git lfs install
           
-          # 3. Create a temporary deployment directory to avoid history conflicts
-          mkdir deploy_dir
-          cp -r * deploy_dir/
-          cd deploy_dir
+          # 3. Create a temporary deployment directory OUTSIDE the current path
+          # We use ../deploy_dir so it is a sibling, not a child
+          mkdir ../deploy_dir
           
-          # 4. Initialize a fresh git repo for the push
+          # 4. Copy everything into the sibling directory
+          cp -r . ../deploy_dir/
+          
+          # 5. Move into that directory
+          cd ../deploy_dir
+          
+          # 6. Initialize and prepare for push
           git init
           git lfs track "*.joblib"
           git add .gitattributes
           git add .
-          git commit -m "MLOps: Automated deployment via GitHub Actions"
+          git commit -m "MLOps: Full automated deployment including all repository files"
           
-          # 5. Push to Hugging Face (Force override to fix the binary error)
+          # 7. Push to Hugging Face
           git remote add hf https://pvinayv:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/pvinayv/tourism-wellness-app
           git push --force hf master:main
