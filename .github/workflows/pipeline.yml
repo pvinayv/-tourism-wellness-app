@@ -40,23 +40,19 @@ jobs:
           # 2. Initialize Git LFS
           git lfs install
           
-          # 3. Create a temporary deployment directory OUTSIDE the current path
-          # We use ../deploy_dir so it is a sibling, not a child
+          # 3. Create a sibling directory to avoid circular copy errors
           mkdir ../deploy_dir
-          
-          # 4. Copy everything into the sibling directory
           cp -r . ../deploy_dir/
-          
-          # 5. Move into that directory
           cd ../deploy_dir
           
-          # 6. Initialize and prepare for push
-          git init
+          # 4. Initialize and force the branch name to 'main'
+          git init -b main
           git lfs track "*.joblib"
           git add .gitattributes
           git add .
-          git commit -m "MLOps: Full automated deployment including all repository files"
+          git commit -m "MLOps: Automated deployment sync"
           
-          # 7. Push to Hugging Face
+          # 5. Push to Hugging Face
+          # We push the local 'main' branch to the remote 'main' branch
           git remote add hf https://pvinayv:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/pvinayv/tourism-wellness-app
-          git push --force hf master:main
+          git push --force hf main:main
