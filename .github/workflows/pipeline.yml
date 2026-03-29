@@ -35,11 +35,12 @@ jobs:
           git config --global user.email "pvinayv@example.com"
           git config --global user.name "pvinayv"
           git lfs install
-          # This creates the instruction for Hugging Face
+          # Force track and migrate the file into LFS format
           git lfs track "*.joblib"
           git add .gitattributes
-          # We commit this change locally in the runner
-          git commit -m "chore: track joblib with LFS" || echo "No changes to commit"
+          # We must ensure the runner 'sees' the joblib as an LFS object
+          git add model.joblib
+          git commit -m "chore: ensure model.joblib is tracked via LFS" || echo "No changes"
 
       - name: Deploy to Hugging Face Spaces
         env:
