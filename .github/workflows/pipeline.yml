@@ -12,7 +12,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # Essential for LFS files to be pulled correctly
           lfs: true
 
       - name: Set up Python
@@ -28,13 +27,11 @@ jobs:
 
       - name: Code Quality Check (Linting)
         run: |
-          # Ensures no syntax errors before the heavy lift of deployment
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
-     - name: Install and Configure Git LFS
+      - name: Configure Git and LFS
         run: |
           git lfs install
-          git lfs track "*.joblib"
           git config --global user.email "git-actions@github.com"
           git config --global user.name "GitHub Actions"
 
@@ -42,11 +39,6 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # Adding the remote using the token for authentication
           git remote add hf https://pvinayv:$HF_TOKEN@huggingface.co/spaces/pvinayv/tourism-wellness-app
-          
-          # We need to make sure the .gitattributes file (which tracks LFS) is included
-          git add .gitattributes
-          
-          # Force push to ensure the Space matches your GitHub exactly
+          # We force push to ensure GitHub's version is the source of truth
           git push --force hf main
