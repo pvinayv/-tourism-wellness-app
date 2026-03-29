@@ -12,6 +12,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # This pulls the actual LFS files instead of just pointers
           lfs: true
 
       - name: Set up Python
@@ -27,18 +28,22 @@ jobs:
 
       - name: Code Quality Check (Linting)
         run: |
+          # Ensures code is clean before deployment
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
-      - name: Configure Git and LFS
+      - name: Configure Git LFS and Identity
         run: |
           git lfs install
-          git config --global user.email "git-actions@github.com"
-          git config --global user.name "GitHub Actions"
+          git lfs track "*.joblib"
+          git config --global user.email "pvinayv@example.com"
+          git config --global user.name "pvinayv"
 
       - name: Deploy to Hugging Face Spaces
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
+          # Adding the remote using the secret token
           git remote add hf https://pvinayv:$HF_TOKEN@huggingface.co/spaces/pvinayv/tourism-wellness-app
-          # We force push to ensure GitHub's version is the source of truth
+          
+          # Force push to resolve any previous binary conflicts
           git push --force hf main
