@@ -42,7 +42,7 @@ jobs:
           
           # 3. Create a temporary deployment directory to avoid history conflicts
           mkdir deploy_dir
-          cp app.py requirements.txt Dockerfile model.joblib deploy_dir/
+          cp -r * deploy_dir/
           cd deploy_dir
           
           # 4. Initialize a fresh git repo for the push
